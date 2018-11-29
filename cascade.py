@@ -197,18 +197,29 @@ def create_model():
 
 model = KerasClassifier(build_fn=create_model)
 checkpoint = ModelCheckpoint('output/best.hdf5', monitor='val_f1_score', verbose=1, save_best_only=True, mode='max')
-model.fit(X,train_y,validation_data=(Xtest,test_y),epochs=100,batch_size=64,verbose=1,callbacks=[checkpoint])
-
-
-model = create_model()
-model.load_weights("output/best.hdf5")
+#model.fit(X,train_y,validation_data=(Xtest,test_y),epochs=100,batch_size=64,verbose=1,callbacks=[checkpoint])
+#model = create_model()
+#model.load_weights("output/best.hdf5")
 #model.save("best.h5s")
 
 #Test Set
-y_pred=model.predict(Xtest)
-y_pred=y_pred.argmax(axis=-1)
-Y_test=test_y.argmax(axis=-1)
-print(metrics.f1_score(Y_test, y_pred, average='weighted'))
-print(metrics.precision_score(Y_test, y_pred, average='weighted'))
-print(metrics.recall_score(Y_test, y_pred, average='weighted'))
+#y_pred=model.predict(Xtest)
+#y_pred=y_pred.argmax(axis=-1)
+#Y_test=test_y.argmax(axis=-1)
+#print(metrics.f1_score(Y_test, y_pred, average='weighted'))
+#print(metrics.precision_score(Y_test, y_pred, average='weighted'))
+#print(metrics.recall_score(Y_test, y_pred, average='weighted'))
 
+batch_size = [32, 64, 128, 256]
+epochs = [10, 50, 100]
+param_grid = dict(batch_size=batch_size, epochs=epochs)
+print (param_grid)
+grid = model_selection.GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=1,cv=5, verbose=2, scoring = metrics.make_scorer(metrics.f1_score))
+grid_result = grid.fit(X, train_y)
+
+print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+means = grid_result.cv_results_['mean_test_score']
+stds = grid_result.cv_results_['std_test_score']
+params = grid_result.cv_results_['params']
+for mean, stdev, param in zip(means, stds, params):
+    print("%f (%f) with: %r" % (mean, stdev, param))
