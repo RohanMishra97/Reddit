@@ -1,3 +1,4 @@
+#Download pickle from https://drive.google.com/open?id=1HDFMrlLJu5bpa_Xrd7nbv8MbJUIVEvQM
 import pickle
 import tensorflow as tf
 import numpy as np
@@ -12,16 +13,13 @@ import csv
 from time import sleep
 import pickle
 import pandas as pd
-from sklearn import model_selection, preprocessing
+from sklearn import model_selection, metrics
 
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
 from keras.layers import Lambda,merge,concatenate,Reshape,Bidirectional,Embedding,Dense, Input,MaxPooling2D,Conv2D,Dropout, Flatten, LSTM
 from keras.initializers import Constant
 from keras.models import Model, Sequential, load_model
 from keras.engine.topology import Layer
-from sklearn import model_selection, preprocessing,svm, metrics
 from keras import initializers, regularizers, constraints
 from keras import optimizers
 from keras import backend as K
@@ -29,7 +27,6 @@ import keras
 from keras.callbacks import ModelCheckpoint,Callback
 from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
 from keras.wrappers.scikit_learn import KerasClassifier
-import keras_metrics
 
 # Parameters
 # ==================================================
@@ -46,8 +43,9 @@ params["l2_reg_lambda"] = 0.5
 params["batch_size"] = 32
 params["num_epochs"] = 100
 
+
 print("loading data...")
-x = pickle.load(open("./mainbalancedpickle.p","rb"))
+x = pickle.load(open("./pickle.p","rb"))
 revs, W, W2, word_idx_map, vocab, max_l = x[0], x[1], x[2], x[3], x[4], x[5]
 print("data loaded!")# Load data
 
@@ -210,10 +208,7 @@ model.load_weights("output/best.hdf5")
 y_pred=model.predict(Xtest)
 y_pred=y_pred.argmax(axis=-1)
 Y_test=test_y.argmax(axis=-1)
-
-
-from sklearn.metrics import make_scorer, f1_score, accuracy_score, recall_score, precision_score, classification_report, precision_recall_fscore_support
-print(f1_score(Y_test, y_pred, average='weighted'))
-print(precision_score(Y_test, y_pred, average='weighted'))
-print(recall_score(Y_test, y_pred, average='weighted'))
+print(metrics.f1_score(Y_test, y_pred, average='weighted'))
+print(metrics.precision_score(Y_test, y_pred, average='weighted'))
+print(metrics.recall_score(Y_test, y_pred, average='weighted'))
 
